@@ -36,13 +36,13 @@ def write_milestone(milestone):
 
 def main():
     try:
-        c.setup("roadmap.md")
-        resp = requests.get(c.get_milestone_url(v._CONFIG_), auth=c.get_basic_auth_credentials(v._CONFIG_))
+        c.setup("issues.md")
+        resp = requests.get(c.get_issues_url(v._CONFIG_), auth=c.get_basic_auth_credentials(v._CONFIG_))
         if resp.status_code == 200:
-            fmt.h1("Technology Roadmap")
-            milestones = simplejson.loads(resp.content)
-            for milestone in milestones:
-                write_milestone(milestone)
+            fmt.h1("Issues")
+            issues = simplejson.loads(resp.content)
+            for issue in milestones:
+                write_issue(issue)
             print "Done."
         else:
             print "Unexpected reponse"
