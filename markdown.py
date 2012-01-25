@@ -31,6 +31,8 @@ def paragraph(text):
 def rule():
     v._OUT_.write("-" * 80)
     newline()
+    newline()
+    newline()
 
 def list_item(text):
     v._OUT_.write("* {0}".format(text))
