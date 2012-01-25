@@ -81,6 +81,28 @@ def cmp_due_dates(a, b):
     else:
         raise RuntimeError()
 
+
+def fetch_issues():
+    
+    def error():
+        print 'Unexpected reponse'
+        print 'Status: %s' % resp.status_code
+        sys.exit(1)
+
+    resp = requests.get(c.get_issues_url(v._CONFIG_), auth=c.get_basic_auth_credentials(v._CONFIG_))
+    if resp.status_code == 200:
+        issues = simplejson.loads(resp.content)
+        resp = requests.get(c.get_issues_url(v._CONFIG_), 
+                            auth=c.get_basic_auth_credentials(v._CONFIG_),
+                            params={'state': 'closed'})
+        if resp.status_code == 200:
+            issues = issues + simplejson.loads(resp.content)
+        else:
+            error()
+    else:
+        error()
+    return issues
+        
 ### MAIN
 
 def main(use_cache):
@@ -90,17 +112,11 @@ def main(use_cache):
             with open('milestones.pickle') as f:
                 milestones = pickle.load(f)
         else:
-            resp = requests.get(c.get_issues_url(v._CONFIG_), auth=c.get_basic_auth_credentials(v._CONFIG_))
-            if resp.status_code == 200:
-                issues = simplejson.loads(resp.content)
-                milestones = add_milestones_with_no_issues(into_milestones(issues))
-                milestones = sorted(milestones.iteritems(), cmp_due_dates)
-                with open('milestones.pickle', 'w') as f:
-                    pickle.dump(milestones, f)
-            else:
-                print 'Unexpected reponse'
-                print 'Status: %s' % resp.status_code
-                return
+            issues = fetch_issues()
+            milestones = add_milestones_with_no_issues(into_milestones(issues))
+            milestones = sorted(milestones.iteritems(), cmp_due_dates)
+            with open('milestones.pickle', 'w') as f:
+                pickle.dump(milestones, f)
         fmt.h1('Technology Roadmap')
         write_milestones(milestones)
         print 'Done.'
